@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
-import bcrypt from "bcrypt";
+import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
 
 const { Schema, model } = mongoose;
 
@@ -35,8 +35,8 @@ const UserSchema = new Schema(
   { timestamps: true }
 );
 
-UserSchema.pre("save", async function (next) {
-  if (this.isModified("password")) {
+UserSchema.pre('save', async function (next) {
+  if (this.isModified('password')) {
     this.password = await bcrypt.hash(this.password, 12);
   }
 });
@@ -47,15 +47,6 @@ UserSchema.statics.checkUserCredentials = async function (
 ) {
   const findUser = await this.findOne({ email });
 
-  // if (findUser) {
-  //   const isMatch = await bcrypt.compare(userGivenPassword, findUser.password);
-
-  //   if (isMatch) return findUser;
-  //   else return null;
-  // } else {
-  //   return null;
-  // }
-
   if (await bcrypt.compare(userGivenPassword, findUser.password)) {
     return findUser;
   } else {
@@ -63,4 +54,4 @@ UserSchema.statics.checkUserCredentials = async function (
   }
 };
 
-export default model("User", UserSchema);
+export default model('User', UserSchema);
