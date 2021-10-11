@@ -1,5 +1,4 @@
 import express, { Router } from "express";
-import userSchema from "../../models/userSchema.js";
 import { JWTAuthenticate } from "../auth/tools.js";
 import { JWTAuthMiddleware } from "../auth/middlewares.js";
 import userModel from "../../models/userSchema.js";
@@ -13,7 +12,7 @@ const userRouter = express.Router();
 
 userRouter.post("/register", async (req, res, next) => {
   try {
-    const newUser = await userSchema.create(req.body);
+    const newUser = await userModel.create(req.body);
 
     res.send(newUser);
   } catch (error) {
@@ -25,7 +24,7 @@ userRouter.post("/login", async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    const findUser = await userSchema.checkUserCredentials(email, password);
+    const findUser = await userModel.checkUserCredentials(email, password);
 
     if (findUser) {
       const { accessToken, refreshToken } = await JWTAuthenticate(findUser);
