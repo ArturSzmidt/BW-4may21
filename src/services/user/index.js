@@ -1,4 +1,4 @@
-import express, { Router } from "express";
+import express from "express";
 import { JWTAuthenticate } from "../auth/tools.js";
 import { JWTAuthMiddleware } from "../auth/middlewares.js";
 import userModel from "../../models/userSchema.js";
@@ -30,19 +30,9 @@ userRouter.post(
   "/me/:userId",
   multer({ storage: cloudinaryStora }).single("avatar"),
 
-<<<<<<< Updated upstream
-userRouter.post(
-  "/me/:userId",
-  multer({ storage: cloudinaryStora }).single("avatar"),
-
   async (req, res, next) => {
     try {
       const modifiedUser = await userModel.findByIdAndUpdate(
-=======
-  async (req, res, next) => {
-    try {
-      const modifiedUser = await userSchema.findByIdAndUpdate(
->>>>>>> Stashed changes
         req.params.userId,
         {
           avatar: req.file.path,
