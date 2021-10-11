@@ -23,6 +23,8 @@ const UserSchema = new Schema(
     },
     avatar: {
       type: String,
+      default:
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Facebook_icon.svg/1200px-Facebook_icon.svg.png",
     },
     password: {
       type: String,
