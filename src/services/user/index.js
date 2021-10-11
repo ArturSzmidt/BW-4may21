@@ -26,7 +26,11 @@ userRouter.post("/register", async (req, res, next) => {
     next(error);
   }
 });
+userRouter.post(
+  "/me/:userId",
+  multer({ storage: cloudinaryStora }).single("avatar"),
 
+<<<<<<< Updated upstream
 userRouter.post(
   "/me/:userId",
   multer({ storage: cloudinaryStora }).single("avatar"),
@@ -34,6 +38,11 @@ userRouter.post(
   async (req, res, next) => {
     try {
       const modifiedUser = await userModel.findByIdAndUpdate(
+=======
+  async (req, res, next) => {
+    try {
+      const modifiedUser = await userSchema.findByIdAndUpdate(
+>>>>>>> Stashed changes
         req.params.userId,
         {
           avatar: req.file.path,
