@@ -8,6 +8,13 @@ import multer from "multer";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import createHttpError from "http-errors";
 
+const cloudinaryStora = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "userProfile",
+  },
+});
+
 const userRouter = express.Router();
 
 userRouter.post("/register", async (req, res, next) => {
@@ -26,7 +33,7 @@ userRouter.post(
 
   async (req, res, next) => {
     try {
-      const modifiedUser = await userSchema.findByIdAndUpdate(
+      const modifiedUser = await userModel.findByIdAndUpdate(
         req.params.userId,
         {
           avatar: req.file.path,
