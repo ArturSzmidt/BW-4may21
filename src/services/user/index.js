@@ -20,6 +20,34 @@ userRouter.post("/register", async (req, res, next) => {
   }
 });
 
+userRouter.post(
+  "/me/:userId",
+  multer({ storage: cloudinaryStora }).single("avatar"),
+
+  async (req, res, next) => {
+    try {
+      const modifiedUser = await userSchema.findByIdAndUpdate(
+        req.params.userId,
+        {
+          avatar: req.file.path,
+        },
+        {
+          new: true,
+        }
+      );
+
+      if (modifiedUser) {
+        res.send(modifiedUser);
+      } else {
+        next(
+          createError(404, `Profile with id ${req.params.userId} not found!`)
+        );
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 userRouter.post("/login", async (req, res, next) => {
   try {
     const { email, password } = req.body;
