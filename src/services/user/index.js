@@ -2,6 +2,7 @@ import express from "express";
 import { JWTAuthenticate } from "../auth/tools.js";
 import { JWTAuthMiddleware } from "../auth/middlewares.js";
 import userModel from "../../models/userSchema.js";
+import q2m from "query-to-mongo";
 
 import { v2 as cloudinary } from "cloudinary";
 import multer from "multer";
@@ -71,9 +72,39 @@ userRouter.post("/login", async (req, res, next) => {
   }
 });
 
+userRouter.get("/", async (req, res, next) => {
+  try {
+    const query = q2m(req.query);
+
+    const findUserByQuery = await userModel.find(
+      query.criteria,
+      query.options.fields
+    );
+
+    res.send(findUserByQuery);
+  } catch (error) {
+    next(error);
+  }
+});
+
 userRouter.get("/me", JWTAuthMiddleware, async (req, res, next) => {
   try {
     res.send(req.user);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
+userRouter.get("/me/:userId", async (req, res, next) => {
+  try {
+    const findUser = await userModel.findOne({ _id: req.params.userId });
+
+    if (findUser) {
+      res.send(findUser);
+    } else {
+      console.log("User not found");
+    }
   } catch (error) {
     console.log(error);
     next(error);
