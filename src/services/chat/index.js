@@ -1,38 +1,84 @@
 import express from "express";
 import chatSchema from "../../models/chatSchema.js";
 import userSchema from "../../models/userSchema.js";
+import { JWTAuthMiddleware } from "../auth/middlewares.js";
 
 const chatRouter = express.Router();
 
-// chatRouter.get("/", async (req, res, next) => {
-//   try {
-//     const chat = await chatSchema.find().populate("members");
-//     // const message = await chatSchema.find().populate("history");
-
-//     res.send({ chat, message });
-//   } catch (error) {
-//     console.log(error);
-//   }
-// });
-
-chatRouter.get("/:userId", async (req, res) => {
+chatRouter.get("/", async (req, res, next) => {
   try {
-    const userChat = await chatSchema.find({
-      members: { $in: [req.params.userId] },
-    });
+    const chat = await chatSchema.find().populate("members");
+    // const message = await chatSchema.find().populate("history");
 
-    res.send(userChat);
-  } catch (error) {}
+    res.send(chat);
+  } catch (error) {
+    console.log(error);
+  }
 });
-chatRouter.post("/", async (req, res, next) => {
+
+chatRouter.post("/", JWTAuthMiddleware, async (req, res, next) => {
   try {
-    const newChat = new chatSchema({
-      members: [req.body.senderId, req.body.receiveId],
-    });
+    const user = req.user;
 
-    const saveChat = await newChat.save();
+    const findMember = await chatSchema.find();
 
-    res.send(saveChat);
+    console.log(findMember);
+    console.log(user._id);
+    console.log(!findMember.roomChatName);
+    console.log(findMember[0].members < 1);
+
+    if (findMember[0].members < 1) {
+    }
+
+    if (findMember) {
+      // findMember[0].members.find((m) => console.log(m));
+      // console.log(user._id);
+      const memberInChat = findMember[0].members.find(
+        (m) => m.toString() === user._id.toString()
+      );
+
+      if (memberInChat) {
+      } else {
+      }
+    }
+
+    // const newChatRoom = await new chatSchema({
+    //   roomChatName: req.body.roomChatName,
+    //   members: user._id,
+    // }).save();
+
+    // res.send(newChatRoom);
+
+    // const findUser = await userSchema.findById({ _id: req.body.userId });
+
+    // const findMemberInChat = await chatSchema.findById({
+    //   _id: req.body.userId,
+    // });
+
+    // console.log(findMemberInChat);
+
+    // if (findUser) {
+    //   const findMemberInChat = await chatSchema.findOneAndUpdate({ req.body.userId, {
+    //     $push:{}
+    //   }})
+    // } else {
+    //   const newChat = new chatSchema({
+    //     members: req.body,
+    //   });
+
+    //   await newChat.save();
+
+    //   console.log(newChat);
+    //   res.send(newChat);
+    // }
+
+    // const newChat = new chatSchema({
+    //   members: [req.body.senderId, req.body.receiveId],
+    // });
+
+    // const saveChat = await newChat.save();
+
+    // res.send(saveChat);
     // const searchUser = await userSchema.findById(req.body.members);
     // let sender = req.body.history.sender;
     // if (searchUser) {
@@ -50,4 +96,15 @@ chatRouter.post("/", async (req, res, next) => {
   }
 });
 
+chatRouter.get("/:userId", async (req, res) => {
+  try {
+    const userChat = await chatSchema.find({
+      members: { $in: [req.params.userId] },
+    });
+
+    res.send(userChat);
+  } catch (error) {
+    console.log(error);
+  }
+});
 export default chatRouter;

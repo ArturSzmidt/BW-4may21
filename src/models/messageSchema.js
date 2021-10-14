@@ -1,13 +1,10 @@
 import mongoose from "mongoose";
 
-const { model, Schema } = mongoose;
+const { Schema } = mongoose;
 
 const messageSchema = new Schema({
   timestamp: {
     type: Number,
-  },
-  chatId: {
-    type: String,
   },
   sender: {
     type: String,
@@ -18,4 +15,4 @@ const messageSchema = new Schema({
   },
 });
 
-export default model("message", messageSchema);
+export default messageSchema;

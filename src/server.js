@@ -6,6 +6,9 @@ import userRouter from "./services/user/index.js";
 import chatRouter from "./services/chat/index.js";
 import { createServer } from "http";
 import { Server } from "socket.io";
+import colors from "colors";
+
+console.log("event was fired🔥  :", "everything is ok".cyan);
 
 import {
   forbiddenErrHandler,
@@ -35,13 +38,25 @@ const io = new Server(httpServer, { allowEIO3: true });
 
 io.on("connection", (socket) => {
   console.log(socket.id);
+
+  socket.on("setUsername", (payload) => {
+    console.log(payload);
+    // console.log();
+  });
+
+  socket.on("loggedIn", () => {
+    socket.emit("welcome", { message: "welcome" });
+
+    // send a message to every body
+    socket.broadcast.emit("newOnlineUser", { id: socket.id });
+  });
 });
 
 // **************Router**********************
 
 server.use("/users", userRouter);
 server.use("/chats", chatRouter);
-server.use("/message", messageRouter);
+server.use("/messages", messageRouter);
 
 // mongoose.connect(process.env.MONGODB_CONNECT);
 
@@ -52,11 +67,16 @@ server.use("/message", messageRouter);
 //     console.log("SERVER listening on: " + PORT);
 //   });
 // });
-
-mongoose.connect(process.env.MONGODB_CONNECT).then(() => {
-  console.log("SUCCESS: connected to MONGODB");
-  server.listen(PORT, () => {
-    listEndpoints(server);
-    console.log("SERVER listening on: " + PORT);
+// httpServer.listen(PORT, () => {
+//   console.table(listEndpoints(server));
+//   console.log("SERVER listening on: " + PORT);
+// });
+mongoose
+  .connect(process.env.MONGODB_CONNECT, { useNewUrlParser: true })
+  .then(() => {
+    console.log("SUCCESS: connected to MONGODB");
+    httpServer.listen(PORT, () => {
+      console.table(listEndpoints(server));
+      console.log("SERVER listening on: " + PORT);
+    });
   });
-});
