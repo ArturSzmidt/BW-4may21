@@ -10,10 +10,11 @@ const chatSchema = new Schema({
 
   roomChatName: {
     type: String,
+    default: "New room",
   },
   members: [{ type: Schema.Types.ObjectId, ref: "User" }],
-  // history: { type: [messageSchema] },
-  history: [{ type: Schema.Types.ObjectId, ref: "Message" }],
+  history: { type: [messageSchema] },
+  // history: [{ type: Schema.Types.ObjectId, ref: "Message" }],
   // history: [
   //   {
   //     sender: {

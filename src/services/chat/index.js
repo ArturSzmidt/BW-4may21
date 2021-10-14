@@ -1,16 +1,32 @@
 import express from "express";
 import chatSchema from "../../models/chatSchema.js";
 import userSchema from "../../models/userSchema.js";
+import { sockets } from "../../server.js";
 import { JWTAuthMiddleware } from "../auth/middlewares.js";
 
 const chatRouter = express.Router();
 
-chatRouter.get("/", async (req, res, next) => {
-  try {
-    const chat = await chatSchema.find().populate("members");
-    // const message = await chatSchema.find().populate("history");
+chatRouter.get("/sockets", JWTAuthMiddleware, (req, res) => {
+  console.log(sockets);
+  console.log(sockets[req.user._id]);
+  console.log(sockets[req.user._id].rooms);
+  res.send();
+});
 
-    res.send(chat);
+chatRouter.get("/", JWTAuthMiddleware, async (req, res, next) => {
+  try {
+    const chats = await chatSchema
+      .find({ members: req.user._id.toString() })
+      .populate("members");
+
+    // user socket should join these chat room
+    // so to receive real time events sent to that chat room
+
+    sockets[req.user._id.toString()].join(chats.map((c) => c._id.toString()));
+
+    console.log(sockets[req.user._id.toString()].rooms);
+
+    res.send(chats);
   } catch (error) {
     console.log(error);
   }
@@ -18,29 +34,58 @@ chatRouter.get("/", async (req, res, next) => {
 
 chatRouter.post("/", JWTAuthMiddleware, async (req, res, next) => {
   try {
-    const user = req.user;
+    // find previous room
 
-    const findMember = await chatSchema.find();
+    const members = [req.user._id.toString(), ...req.body.members];
 
-    console.log(findMember);
-    console.log(user._id);
-    console.log(!findMember.roomChatName);
-    console.log(findMember[0].members < 1);
+    const previousChat = await chatSchema.findOne({ members });
 
-    if (findMember[0].members < 1) {
+    let chatToSend;
+
+    if (req.body.members.length === 1 && previousChat) {
+      chatToSend = previousChat;
+    } else {
+      const newChatRoom = await new chatSchema({ members }).save();
+
+      chatToSend = newChatRoom;
     }
 
-    if (findMember) {
-      // findMember[0].members.find((m) => console.log(m));
-      // console.log(user._id);
-      const memberInChat = findMember[0].members.find(
-        (m) => m.toString() === user._id.toString()
-      );
+    // every member of the chat should have their socket connected to the chat
+    // for each member
 
-      if (memberInChat) {
-      } else {
-      }
+    for (let member of members) {
+      sockets[member]?.join(chatToSend._id.toString());
     }
+
+    res.send(chatToSend);
+
+    // if (req.body.length === 1 && previousChat) {`
+    //send the previous chat
+    //return
+    //}
+    // else, move on:
+
+    // const newChatRoom = await new chatSchema({
+    //   members: req.user._id.toString(),
+    //   ...req.body,
+    // }).save();
+
+    // res.send(newChatRoom);
+
+    // if (findMember) {
+    //   if (findMember[0].members < 1 && !findMember.roomChatName) {
+    //     res.send(findMember);
+    //   } else {
+    //     const newChatRoom = await new chatSchema({
+    //       roomChatName: req.body.roomChatName,
+    //       members: user._id,
+    //     }).save();
+    //   }
+
+    // const memberInChat = findMember[0].members.find(
+    //   (m) => m.toString() === user._id.toString()
+    // );
+    // console.log(memberInChat);
 
     // const newChatRoom = await new chatSchema({
     //   roomChatName: req.body.roomChatName,

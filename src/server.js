@@ -17,6 +17,7 @@ import {
   notFoundErrHandler,
 } from "./errorHandlers.js";
 import messageRouter from "./services/message/index.js";
+import { verifyJWT } from "./services/auth/tools.js";
 
 //import routers
 //models import
@@ -36,8 +37,17 @@ const httpServer = createServer(server);
 
 const io = new Server(httpServer, { allowEIO3: true });
 
-io.on("connection", (socket) => {
+export const sockets = {};
+
+io.on("connection", async (socket) => {
   console.log(socket.id);
+
+  console.log(socket.request.headers.authorization);
+
+  const { _id: userId } = await verifyJWT(socket.request.headers.authorization);
+  sockets[userId] = socket;
+
+  console.log(socket.rooms);
 
   socket.on("setUsername", (payload) => {
     console.log(payload);
