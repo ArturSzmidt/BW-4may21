@@ -3,15 +3,14 @@ import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const messageSchema = new Schema({
-  timestamp: {
-    type: Number,
-  },
-  sender: {
+  // timestamp: {
+  //   type: Number,
+  // },
+  // sender: {
+  //   type: String,
+  // },
+  message: {
     type: String,
-  },
-  content: {
-    text: String,
-    media: String,
   },
 });
 

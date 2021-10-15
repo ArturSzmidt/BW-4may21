@@ -18,6 +18,7 @@ import {
 } from "./errorHandlers.js";
 import messageRouter from "./services/message/index.js";
 import { verifyJWT } from "./services/auth/tools.js";
+import chatSchema from "./models/chatSchema.js";
 
 //import routers
 //models import
@@ -40,7 +41,7 @@ const io = new Server(httpServer, { allowEIO3: true });
 export const sockets = {};
 
 io.on("connection", async (socket) => {
-  console.log(socket.id);
+  // console.log(socket.id);
 
   console.log(socket.request.headers.authorization);
 
@@ -50,7 +51,7 @@ io.on("connection", async (socket) => {
   console.log(socket.rooms);
 
   socket.on("setUsername", (payload) => {
-    console.log(payload);
+    // console.log(payload);
     // console.log();
   });
 
@@ -59,6 +60,27 @@ io.on("connection", async (socket) => {
 
     // send a message to every body
     socket.broadcast.emit("newOnlineUser", { id: socket.id });
+  });
+
+  socket.on("sendMessage", async ({ message, roomId }) => {
+    try {
+      socket.join(roomId);
+      console.log(message);
+      console.log(roomId);
+
+      await chatSchema.findByIdAndUpdate(
+        "616961a4150e74c8eacefc88",
+        {
+          $push: { history: message },
+        },
+        {
+          new: true,
+        }
+      );
+      socket.to(roomId).emit("message", message);
+    } catch (error) {
+      console.log(error);
+    }
   });
 });
 

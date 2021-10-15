@@ -13,7 +13,7 @@ const chatSchema = new Schema({
     default: "New room",
   },
   members: [{ type: Schema.Types.ObjectId, ref: "User" }],
-  history: { type: [messageSchema] },
+  history: { type: [messageSchema], required: [true, "Message its required"] },
   // history: [{ type: Schema.Types.ObjectId, ref: "Message" }],
   // history: [
   //   {
